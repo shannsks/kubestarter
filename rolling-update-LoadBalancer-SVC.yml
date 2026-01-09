@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: namespace
+metadata: 
+  name: rolling-ns
+
+---
+
+apiVersion: app/v1
+kind: deployment
+metadata:
+  name: reactui
+  namespace: rolling-ns
+  labels:
+    app: reactui
+spec:
+  replicas: 2
+  strategy: 
+    type: rollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+selector:
+  matchLabels:
+    app: reactui
+
+template:
+  metadata:
+    labels:
+      app: reactui
+
+spec:
+  containers:
+    - name: reactui
+      image: shannusks/frontend-ui
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        limits:  
+          cpu:"500m"
+          memory: "512Mi"
+
+---
+apiVersion: v1
+
+kind: Service
+metadata:
+  name: ru-Service
+  namespace: rolling-ns
+
+spec:
+  selector:
+    app: reactui
+  type: LoadBalancer
+  ports: 
+    - protocol: TCP
+      port: 80
+      targetPort: 80    
+
+
+
+          
+
+
+
